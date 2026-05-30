@@ -11,6 +11,8 @@ services:
       POSTGRES_DB: mybuddy
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Map the local DB schema files to the auto-run entrypoint directory
+      - ./db-schema/:/docker-entrypoint-initdb.d/
     shm_size: 1g
 
 volumes:
