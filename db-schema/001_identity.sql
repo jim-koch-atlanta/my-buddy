@@ -8,3 +8,10 @@ CREATE TABLE users (
   status         text NOT NULL DEFAULT 'active', -- active|suspended|deleted
   created_at     timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON users
+  USING       (id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (id = current_setting('app.current_user_id')::uuid);

@@ -21,6 +21,13 @@ CREATE TABLE user_life_domains (
   PRIMARY KEY (user_id, life_domain_id)
 );
 
+ALTER TABLE user_life_domains ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_life_domains FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON user_life_domains
+  USING       (user_id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (user_id = current_setting('app.current_user_id')::uuid);
+
 CREATE TABLE goals (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- denormalized for RLS + scoping
@@ -30,6 +37,13 @@ CREATE TABLE goals (
   status      text NOT NULL DEFAULT 'active', -- active|paused|done|dropped
   created_at  timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE goals FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON goals
+  USING       (user_id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (user_id = current_setting('app.current_user_id')::uuid);
 
 CREATE TABLE nudges (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -44,6 +58,13 @@ CREATE TABLE nudges (
   created_at     timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE nudges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nudges FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON nudges
+  USING       (user_id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (user_id = current_setting('app.current_user_id')::uuid);
+
 CREATE TABLE daily_plans (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -52,6 +73,13 @@ CREATE TABLE daily_plans (
   created_at  timestamptz NOT NULL DEFAULT now(),
   UNIQUE (user_id, plan_date)
 );
+
+ALTER TABLE daily_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_plans FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON daily_plans
+  USING       (user_id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (user_id = current_setting('app.current_user_id')::uuid);
 
 CREATE TABLE daily_plan_items (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -63,6 +91,13 @@ CREATE TABLE daily_plan_items (
   status        text NOT NULL DEFAULT 'pending'  -- pending|sent|done|skipped|snoozed
 );
 
+ALTER TABLE daily_plan_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_plan_items FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON daily_plan_items
+  USING       (user_id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (user_id = current_setting('app.current_user_id')::uuid);
+
 CREATE TABLE nudge_feedback (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -72,6 +107,13 @@ CREATE TABLE nudge_feedback (
   notes         text,
   created_at    timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE nudge_feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nudge_feedback FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON nudge_feedback
+  USING       (user_id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (user_id = current_setting('app.current_user_id')::uuid);
 
 -- Audit trail + per-tenant cost metering.
 CREATE TABLE agent_runs (
@@ -87,3 +129,10 @@ CREATE TABLE agent_runs (
   cost_usd      numeric(10,5),
   created_at    timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE agent_runs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE agent_runs FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON agent_runs
+  USING       (user_id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (user_id = current_setting('app.current_user_id')::uuid);

@@ -18,6 +18,13 @@ CREATE TABLE memories (
   created_at   timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE memories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE memories FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON memories
+  USING       (user_id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (user_id = current_setting('app.current_user_id')::uuid);
+
 CREATE TABLE memory_embeddings (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,    -- denormalized for RLS + per-tenant vector search
@@ -36,3 +43,10 @@ CREATE INDEX memories_filter ON memories (user_id, memory_type, valid_until);
 -- Fetch a memory's chunks; the user_id index keeps vector search tenant-scoped.
 CREATE INDEX memory_embeddings_by_memory ON memory_embeddings (memory_id);
 CREATE INDEX memory_embeddings_by_user   ON memory_embeddings (user_id);
+
+ALTER TABLE memory_embeddings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE memory_embeddings FORCE  ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON memory_embeddings
+  USING       (user_id = current_setting('app.current_user_id')::uuid)
+  WITH CHECK  (user_id = current_setting('app.current_user_id')::uuid);
