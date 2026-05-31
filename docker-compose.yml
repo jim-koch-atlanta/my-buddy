@@ -6,9 +6,11 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: mybuddy
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: mybuddy
+      POSTGRES_USER: ${ADMIN_USER}
+      POSTGRES_PASSWORD: ${ADMIN_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      APPUSER_USER: ${APPUSER_USER}
+      APPUSER_PASSWORD: ${APPUSER_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # Map the local DB schema files to the auto-run entrypoint directory
