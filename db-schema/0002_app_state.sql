@@ -5,6 +5,14 @@ CREATE TABLE life_domains (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
+INSERT INTO life_domains (name) VALUES ('friendships');
+INSERT INTO life_domains (name) VALUES ('dating');
+INSERT INTO life_domains (name) VALUES ('fitness');
+INSERT INTO life_domains (name) VALUES ('sleep');
+INSERT INTO life_domains (name) VALUES ('learning');
+INSERT INTO life_domains (name) VALUES ('job search');
+INSERT INTO life_domains (name) VALUES ('hobbies');
+
 -- Per-user configuration of a domain. An association entity: a join table that carries
 -- its own columns. Tenant-owned → ENABLE/FORCE RLS like the other user tables.
 CREATE TABLE user_life_domains (
