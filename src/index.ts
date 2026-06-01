@@ -52,7 +52,7 @@ app.use((req: Request, res: Response, next) => {
   next();
 });
 
-const user_id='11111111-2222-3333-4444-555555555555';
+const user_id='';
 
 // Sample Route: Get current database time to verify connection
 app.get('/api/db-status', async (req: Request, res: Response) => {

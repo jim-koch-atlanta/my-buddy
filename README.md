@@ -32,7 +32,7 @@ Again, this is primarily a hobby project for me. I'd like to try to write much o
 
 ### Architecture Diagram
 
-Pretty picture of the design, maybe by Claude:
+Pretty picture of the design, made by Claude:
 ```
 ┌─────────────┐   HTTPS     ┌───────────────────────────┐
 │  React SPA  │ ──────────► │   API (Express/TS)        │
