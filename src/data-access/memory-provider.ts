@@ -15,7 +15,7 @@ export class MemoryProvider {
             confidence: row.confidence,
             validFrom: row.valid_from,
             validUntil: row.valid_until,
-            supersededBy?: row.superseded_by,
+            supersededBy: row.superseded_by,
             createdAt: row.created_at,
         }
     }
@@ -32,7 +32,7 @@ export class MemoryProvider {
 
     public static async getByUserId(user_id: string, limit: number | null = null): Promise<Memory[]> {
         let query = `SELECT id, user_id, memory_type, domain, source_type, source_id, content, importance, confidence, valid_from, valid_until, superseded_by, created_at
-                    FROM memories WHERE user_id=$1 ORDER BY plan_date DESC`;
+                    FROM memories WHERE user_id=$1 ORDER BY valid_from DESC`;
 
         const params: any[] = [ user_id ];
         if (limit !== null) {
