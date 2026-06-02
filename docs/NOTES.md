@@ -14,3 +14,19 @@ npm install -D typescript @types/node @types/express @types/pg ts-node-dev
 5. Start the Postgres DB container with `docker compose down -v && docker compose up --build`.
 6. Run `npm run dev`.
 7. In a browser, verify access to [http://localhost:3000/api/db-status](http://localhost:3000/api/db-status).
+
+## Step 4: Add local seed data for two test users for testing.
+
+See [9998_user1.sql](../db-schema/9998_user1.sql) and [9999_user2.sql](../db-schema/9999_user2.sql). Honestly, I used Claude for this part. It did pretty good.
+
+## Step 5: Build the data-access layer
+
+I split the actually DB access from the object definitions. For example, see [user-provider.ts](../src/data-access/user-provider.ts) vs. [user.ts](../src/models/user.ts).
+
+While doing this work, I also updated to support row-level security (RLS) with tenant-context. The big thing that I fumbled was actually setting `app.current_user_id`. From `psql`, you would just:
+
+```
+SET LOCAL app.current_user_id="1234-5678-90ab-..."
+```
+so I tried doing that in [user-pool-provider.ts](../src/data-access/user-pool-provider.ts), and it was giving me an error about passing 1 parameter for a query with no parameterized values. I finally sorted out switching to `SELECT set_config()`.
+
