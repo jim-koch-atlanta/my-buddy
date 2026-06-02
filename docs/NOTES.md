@@ -30,3 +30,17 @@ SET LOCAL app.current_user_id="1234-5678-90ab-..."
 ```
 so I tried doing that in [user-pool-provider.ts](../src/data-access/user-pool-provider.ts), and it was giving me an error about passing 1 parameter for a query with no parameterized values. I finally sorted out switching to `SELECT set_config()`.
 
+## Testing Note
+**Note**: For testing, first start up the Postgres container:
+```
+docker composer down -v && docker compose up --build
+```
+
+Then I can run `npx tsx` and have a REPL:
+```
+const m = await import('./src/data-access/user-pool-provider.ts')
+const userPool = m.default.getUserPoolProvider('11111111-2222-3333-4444-555555555555')
+await userPool.query('SELECT * FROM nudges WHERE user_id=$1', ['11111111-2222-3333-4444-555555555555'])
+```
+
+Neat.
