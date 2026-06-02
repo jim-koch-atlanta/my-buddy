@@ -44,3 +44,32 @@ await userPool.query('SELECT * FROM nudges WHERE user_id=$1', ['11111111-2222-33
 ```
 
 Neat.
+
+## Memory data model
+
+We'll need the `Memory` data model and `MemoryProvider` for testing `LlmProvider` and `RagService`. Validating that `MemoryProvider` is written correctly:
+
+```
+const m = await import('./src/data-access/memory-provider.ts')
+await m.default.MemoryProvider.getByUserId('11111111-2222-3333-4444-555555555555');
+await m.default.MemoryProvider.getById('11111111-2222-3333-4444-555555555555', '7eb7bb8b-51b9-4c4b-ad8a-d155301c019a');
+```
+
+## RAG support
+
+The next steps are:
+1. `LlmProvider.embed()`: (text → vectors)
+2. `RagService.ingestMemory()`: chunk, embed, store. Will use `LlmProvider.embed()`.
+3. `RagService.retrieveMemories()` — embed the query, cosine search for the retrieval.
+
+### `LlmProvider.embed()`
+
+First I had to `npm install openai`. Writing the code was pretty easy... see [OpenAiLlmProviderts.](../src/buddy-ai/openai/OpenAiLlmProvider.ts). Verified the `embed()` function:
+```
+const m = await import('./src/buddy-ai/openai/OpenAiLlmProvider.ts')
+provider = new m.default.OpenAiLlmProvider();
+await provider.embed(['Jim is testing embeddings.']);
+```
+
+### `RagService.ingestMemory()`
+
