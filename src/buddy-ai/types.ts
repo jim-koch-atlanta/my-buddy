@@ -1,4 +1,4 @@
-// ai/types.ts
+import { MemoryEmbedding } from "../models/memory-embedding";
 
 export type Role = "system" | "user" | "assistant";
 
@@ -21,17 +21,6 @@ export type Embedding = number[];
 export interface EmbedOptions {
   model?: string;
   dimensions?: number;
-}
-
-export interface MemoryEmbedding {
-  id: string;
-  userId: string;
-  memoryId: string;
-  chunkIndex: number;
-  chunkText: string;
-  embedding: Embedding;
-  embeddingModel: string;
-  createdAt: Date;
 }
 
 export interface RetrievedMemoryEmbedding extends MemoryEmbedding {
