@@ -6,5 +6,5 @@ export interface User {
     cognitoSub: string;
     emailVerified: boolean;
     status: string;
-    createdAt: string;
+    createdAt: Date;
 }
