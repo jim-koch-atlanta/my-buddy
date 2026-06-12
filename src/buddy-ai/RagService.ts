@@ -1,7 +1,8 @@
-import { Memory } from "../models/memory";
+import { MemoryInput } from "./types";
 
-interface RagService {
-  ingestMemory(userId: string, input: Memory): Promise<void>;
+export interface RagService {
+  embedMemory(userId: string, input: MemoryInput): Promise<void>;
+  ingestMemory(userId: string, input: MemoryInput): Promise<void>;
   //retrieveMemories(userId: string, query: string, filters: MemoryFilters): Promise<Memory[]>;
   //buildContextBlock(memories: Memory[]): string;
 }
