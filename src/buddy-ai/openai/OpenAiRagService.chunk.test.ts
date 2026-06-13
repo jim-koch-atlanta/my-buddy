@@ -5,7 +5,7 @@ import { LlmProvider } from '../LlmProvider';
 // chunk() doesn't use the LlmProvider, but the constructor requires one.
 // A stub satisfies the type without doing any real work.
 const stubLlm: LlmProvider = {
-    embed: async () => [],
+    embed: async () => ({ embeddings: [], embeddingModel: 'stub' }),
 };
 
 const service = new OpenAiRagService({ llmProvider: stubLlm });

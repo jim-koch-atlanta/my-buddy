@@ -29,6 +29,5 @@ export interface RetrievedMemoryEmbedding extends MemoryEmbedding {
 
 export interface MemoryInput {
     userId: string;
-    memoryId: string;
     content: string;
 }

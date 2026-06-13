@@ -71,5 +71,33 @@ provider = new m.default.OpenAiLlmProvider();
 await provider.embed(['Jim is testing embeddings.']);
 ```
 
-### `RagService.ingestMemory()`
+### `RagService.embedMemory()`
 
+As a short-term step, I wrote the code to perfrom embedding on an unembedded (`string`) memory. The steps are:
+
+1. Perform chunking. This breaks on paragraphs, and then if necessary it'll do a rolling window.
+2. Call `LlmProvider.embed()` to convert from chunk text to `number[]`.
+3. Store the embeddings (`number[][]`) to the `memory_embeddings` table.
+
+Verified with the following code:
+```
+const OpenAiLlmProvider = await import('./src/buddy-ai/openai/OpenAiLlmProvider.ts')
+const OpenAiRagService = await import('./src/buddy-ai/openai/OpenAiRagService.ts')
+const MemoryProvider = await import('./src/data-access/memory-provider.ts')
+
+const userId = '11111111-2222-3333-4444-555555555555'  // Jim
+const svc = new OpenAiRagService.default.OpenAiRagService({ llmProvider: new OpenAiLlmProvider.default.OpenAiLlmProvider({}) })
+
+const memories = await MemoryProvider.default.MemoryProvider.getByUserId(userId)   // his 6 seeded memories
+const m = memories[0]
+await svc.embedMemory(userId, m.id, { userId, content: m.content })
+
+const MemoryEmbeddingProvider = await import('./src/data-access/memory-embedding-provider.ts')
+const rows = await MemoryEmbeddingProvider.default.MemoryEmbeddingProvider.getByUserId(userId)
+rows.length
+rows[0].embedding.length
+```
+
+This should only be called by `RagService.ingestMemory()`, so I'll work on that next.
+
+### `RagService.ingestMemory()`

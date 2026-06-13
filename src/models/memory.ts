@@ -1,5 +1,4 @@
-export interface Memory {
-    id: string;
+export interface ProtoMemory {
     userId: string;
     memoryType: string;
     domain: string | null;
@@ -11,5 +10,9 @@ export interface Memory {
     validFrom: Date;
     validUntil: Date | null;
     supersededBy: string | null;
+}
+
+export interface Memory extends ProtoMemory {
+    id: string;
     createdAt: Date;
 }

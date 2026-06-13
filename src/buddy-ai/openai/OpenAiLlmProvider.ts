@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import OpenAI from "openai";
-import { LlmProvider } from '../LlmProvider';
-import { Embedding, EmbedOptions } from '../types';
+import { EmbedResult, LlmProvider } from '../LlmProvider';
+import { EmbedOptions } from '../types';
 
 dotenv.config();
 
@@ -26,16 +26,25 @@ export class OpenAiLlmProvider implements LlmProvider {
         this.defaultEmbeddingDimensions = options?.defaultEmbeddingDimensions ?? 1536;
     }
 
-    async embed(texts: string[], options?: EmbedOptions): Promise<Embedding[]> {
+    async embed(texts: string[], options?: EmbedOptions): Promise<EmbedResult> {
+        const model = options?.model ?? this.defaultEmbeddingModel;
+
         // OpenAI supports embedding multiple chunks at once.
         const response = await this.client.embeddings.create({
             input: texts,
-            model: options?.model ?? this.defaultEmbeddingModel,
+            model: model,
             dimensions: options?.dimensions ?? this.defaultEmbeddingDimensions,
-        })
+        });
 
-        return response.data
+        // The API returns one item per input; `index` ties each back to texts[index].
+        // Sort by index so the pairing is guaranteed, then zip chunk <-> embedding.
+        const embeddings = response.data
             .sort((a, b) => a.index - b.index)
-            .map((item) => item.embedding);
-    }    
+            .map((item) => ({
+                chunk: texts[item.index],
+                embedding: item.embedding,
+            }));
+
+        return { embeddings, embeddingModel: model };
+    }
 }

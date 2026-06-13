@@ -1,5 +1,5 @@
 import { getUserPoolProvider } from "./user-pool-provider";
-import { Memory } from "../models/memory";
+import { Memory, ProtoMemory } from "../models/memory";
 
 export class MemoryProvider {
     private static rowToMemory(row: any): Memory {
@@ -56,4 +56,34 @@ export class MemoryProvider {
 
         return this.rowToMemory(rows[0]);
     }
+
+    public static async create(user_id: string, memory: ProtoMemory): Promise<Memory> {
+        const query = `
+            INSERT INTO memories (
+                user_id, memory_type, domain,
+                source_type, source_id, content,
+                importance, confidence, valid_from,
+                valid_until, superseded_by
+            )
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            RETURNING *`;
+
+         const params: any[] =
+            [
+                user_id, memory.memoryType, memory.domain,
+                memory.sourceType, memory.sourceId, memory.content,
+                memory.importance, memory.confidence, memory.validFrom,
+                memory.validUntil, memory.supersededBy
+            ];
+
+        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+
+        if (rows.length == 0) {
+            throw new Error(`INSERT to memories table returned no rows.`);
+        } else if (rows.length > 1) {
+            console.error(`Multiple rows returned on INSERT: ${ JSON.stringify(rows)}`);
+        }
+
+        return this.rowToMemory(rows[0]);
+   }
 }
