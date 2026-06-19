@@ -101,3 +101,36 @@ rows[0].embedding.length
 This should only be called by `RagService.ingestMemory()`, so I'll work on that next.
 
 ### `RagService.ingestMemory()`
+First, start up the containers:
+```
+docker composer down -v && docker compose up --build
+```
+
+Then verify with the following code:
+```
+const OpenAiLlmProvider = await import('./src/buddy-ai/openai/OpenAiLlmProvider.ts')
+const OpenAiRagService = await import('./src/buddy-ai/openai/OpenAiRagService.ts')
+const MemoryProvider = await import('./src/data-access/memory-provider.ts')
+
+const userId = '11111111-2222-3333-4444-555555555555'  // Jim
+const svc = new OpenAiRagService.default.OpenAiRagService({ llmProvider: new OpenAiLlmProvider.default.OpenAiLlmProvider({}) })
+
+const newMemory = {
+  userId: '11111111-2222-3333-4444-555555555555',
+  memoryType: 'preference',
+  domain: 'dating',
+  sourceType: 'manual',
+  sourceId: null,
+  content: 'Jim skipped today\'s nudge because he was too busy.',
+  importance: 3,
+  confidence: 0.5,
+  validFrom: new Date('2026-06-07T12:00:00.000Z'),
+  validUntil: null
+}
+
+await svc.ingestMemory(userId, newMemory)
+
+const MemoryEmbeddingProvider = await import('./src/data-access/memory-embedding-provider.ts')
+const rows = await MemoryEmbeddingProvider.default.MemoryEmbeddingProvider.getByUserId(userId)
+rows.length
+```

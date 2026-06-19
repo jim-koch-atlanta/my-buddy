@@ -26,8 +26,3 @@ export interface EmbedOptions {
 export interface RetrievedMemoryEmbedding extends MemoryEmbedding {
   similarity: number;
 }
-
-export interface MemoryInput {
-    userId: string;
-    content: string;
-}

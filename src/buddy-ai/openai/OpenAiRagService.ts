@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 import { RagService } from '../RagService';
-import { MemoryInput } from '../types';
 import { LlmProvider } from '../LlmProvider';
+import { Memory, NewMemory, ProtoMemory } from '../../models/memory';
 import { MemoryEmbedding, ProtoMemoryEmbedding } from '../../models/memory-embedding';
 import { MemoryEmbeddingProvider } from '../../data-access/memory-embedding-provider';
+import { MemoryProvider } from '../../data-access/memory-provider';
 
 dotenv.config();
 
@@ -20,8 +21,8 @@ export class OpenAiRagService implements RagService {
     }
 
     // Embed a memory, and create the rows in the memory_embeddings table.
-    async embedMemory(userId: string, memoryId: string, input: MemoryInput): Promise<void> {
-        let chunks = this.chunk(input.content);
+    async embedMemory(userId: string, memoryId: string, content: string): Promise<void> {
+        let chunks = this.chunk(content);
         const embedResult = await this.llmProvider.embed(chunks);
         for (let i = 0; i < embedResult.embeddings.length; i++) {
             const memoryEmbedding: ProtoMemoryEmbedding = {
@@ -37,8 +38,14 @@ export class OpenAiRagService implements RagService {
     }
 
     // Create a row in the memories table, then embed it.
-    ingestMemory(userId: string, input: MemoryInput): Promise<void> {
-        throw new Error('Method not implemented.');
+    async ingestMemory(userId: string, newMemory: NewMemory): Promise<void> {
+        const protoMemory: ProtoMemory = {
+            ...newMemory,
+            supersededBy: null
+        }
+
+        const memory: Memory = await MemoryProvider.create(userId, protoMemory);
+        await this.embedMemory(memory.userId, memory.id, memory.content);
     }
 
     chunk(content: string): string[] {
