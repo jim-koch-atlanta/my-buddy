@@ -26,7 +26,6 @@ export class OpenAiRagService implements RagService {
         const embedResult = await this.llmProvider.embed(chunks);
         for (let i = 0; i < embedResult.embeddings.length; i++) {
             const memoryEmbedding: ProtoMemoryEmbedding = {
-                userId: userId,
                 memoryId: memoryId,
                 chunkIndex: i,
                 chunkText: embedResult.embeddings[i].chunk,
@@ -45,7 +44,7 @@ export class OpenAiRagService implements RagService {
         }
 
         const memory: Memory = await MemoryProvider.create(userId, protoMemory);
-        await this.embedMemory(memory.userId, memory.id, memory.content);
+        await this.embedMemory(userId, memory.id, memory.content);
     }
 
     chunk(content: string): string[] {

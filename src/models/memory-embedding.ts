@@ -1,5 +1,4 @@
 export interface ProtoMemoryEmbedding {
-    userId: string;
     memoryId: string;
     chunkIndex: number;
     chunkText: string;
@@ -9,5 +8,6 @@ export interface ProtoMemoryEmbedding {
 
 export interface MemoryEmbedding extends ProtoMemoryEmbedding {
     id: string;
+    userId: string;
     createdAt: Date;
 }
