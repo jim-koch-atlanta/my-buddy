@@ -1,5 +1,7 @@
 import { getUserPoolProvider } from "./user-pool-provider";
 import { MemoryEmbedding, ProtoMemoryEmbedding } from "../models/memory-embedding";
+import { RetrievedMemoryEmbedding } from "../buddy-ai/types";
+import { MemoryFilters } from "./memory-filters/memory-filters";
 
 export class MemoryEmbeddingProvider {
 
@@ -51,6 +53,41 @@ export class MemoryEmbeddingProvider {
         }
 
         return this.rowToMemoryEmbedding(rows[0]);
+    }
+
+    private static rowToRetrievedMemoryEmbedding(row: any): RetrievedMemoryEmbedding {
+        return {
+            ...this.rowToMemoryEmbedding(row),
+            similarity: row.similarity,
+        }
+    }
+
+    public static async getRelatedMemories(user_id: string, embeddedQuery: number[], filters: MemoryFilters, limit: number): Promise<RetrievedMemoryEmbedding[]> {
+        const embeddedQueryStr: string = this.embeddingToPostgresFormat(embeddedQuery);
+
+        let query = `
+            SELECT e.id, e.user_id, e.memory_id, e.chunk_index, e.chunk_text, e.embedding, e.embedding_model, e.created_at,
+                1 - (e.embedding <=> $1) AS similarity   -- friendly 0..1, higher = better
+            FROM memory_embeddings e
+            JOIN memories m ON m.id = e.memory_id
+            WHERE (m.valid_until IS NULL OR m.valid_until > now()) AND
+            e.user_id=$2`;
+
+        let params: any[] = [ embeddedQueryStr, user_id ];
+        for (const filter of filters) {
+            let [clause, updatedParams] = await filter.getWhereClauseAndParams(params);
+            params = updatedParams;
+            query += ` AND ${clause}`;
+        }
+
+        // Ascending, smallest distance first. Reuses $1 (the query vector) from the SELECT.
+        query += ` ORDER BY e.embedding <=> $1`;
+
+        params.push(limit);
+        query += ` LIMIT $${params.length}`;
+
+        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        return rows.map((row) => this.rowToRetrievedMemoryEmbedding(row));
     }
 
     private static embeddingToPostgresFormat(embeddedChunk: number[]): string {

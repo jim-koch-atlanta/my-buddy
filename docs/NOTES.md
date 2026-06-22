@@ -33,7 +33,7 @@ so I tried doing that in [user-pool-provider.ts](../src/data-access/user-pool-pr
 ## Testing Note
 **Note**: For testing, first start up the Postgres container:
 ```
-docker composer down -v && docker compose up --build
+docker compose down -v && docker compose up --build
 ```
 
 Then I can run `npx tsx` and have a REPL:
@@ -103,7 +103,7 @@ This should only be called by `RagService.ingestMemory()`, so I'll work on that 
 ### `RagService.ingestMemory()`
 First, start up the containers:
 ```
-docker composer down -v && docker compose up --build
+docker compose down -v && docker compose up --build
 ```
 
 Then verify with the following code:
@@ -133,4 +133,37 @@ await svc.ingestMemory(userId, newMemory)
 const MemoryEmbeddingProvider = await import('./src/data-access/memory-embedding-provider.ts')
 const rows = await MemoryEmbeddingProvider.default.MemoryEmbeddingProvider.getByUserId(userId)
 rows.length
+```
+
+### `RagService.retrieveMemories()`
+
+I tested this with the script [retrieve-memories.ts](../scripts/scratch/retrieve-memories.ts).
+
+```bash
+$ docker compose down -v && docker compose up --build
+$ npx tsx scripts/scratch/retrieve-memories.ts
+Ingesting test memories...
+
+Query: "What paddle sports does Jim enjoy?"
+
+Results (best first):
+  [0.6610]  Jim has played pickleball once and enjoyed it a lot.
+  [0.5464]  Jim has played ping-pong many times, and he does not like it at all.
+  [0.4492]  Jim's relatives used to play ping-pong at Thanksgiving, and Jim would lose.
+  [0.4249]  Jim has read the Andre Agassi book "Open" and enjoyed it.
+  [0.4245]  Jim played tennis from when he was a little kid until 11th grade.
+  [0.4064]  Jim is in a book club.
+
+$ npx tsx scripts/scratch/retrieve-memories.ts "What is Jim's experience with cloud infrastructure?"
+Ingesting test memories...
+
+Query: "What is Jim's experience with cloud infrastructure?"
+
+Results (best first):
+  [0.4137]  Jim is in a book club.
+  [0.3894]  Jim has played ping-pong many times, and he does not like it at all.
+  [0.3779]  Jim has played pickleball once and enjoyed it a lot.
+  [0.3506]  Jim's relatives used to play ping-pong at Thanksgiving, and Jim would lose.
+  [0.3442]  Jim has read the Andre Agassi book "Open" and enjoyed it.
+  [0.3212]  Jim played tennis from when he was a little kid until 11th grade.
 ```

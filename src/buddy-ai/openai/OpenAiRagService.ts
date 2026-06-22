@@ -5,6 +5,7 @@ import { Memory, NewMemory, ProtoMemory } from '../../models/memory';
 import { MemoryEmbedding, ProtoMemoryEmbedding } from '../../models/memory-embedding';
 import { MemoryEmbeddingProvider } from '../../data-access/memory-embedding-provider';
 import { MemoryProvider } from '../../data-access/memory-provider';
+import { MemoryFilters } from '../../data-access/memory-filters/memory-filters';
 
 dotenv.config();
 
@@ -45,6 +46,29 @@ export class OpenAiRagService implements RagService {
 
         const memory: Memory = await MemoryProvider.create(userId, protoMemory);
         await this.embedMemory(userId, memory.id, memory.content);
+    }
+
+    async retrieveMemories(userId: string, query: string, filters: MemoryFilters, limit: number): Promise<Memory[]> {
+        const embeddedQuery = await this.llmProvider.embed( [ query ] );
+        const embeddings = await MemoryEmbeddingProvider.getRelatedMemories(userId, embeddedQuery.embeddings[0].embedding, filters, limit);
+
+        // Track memory IDs already seen so duplicate chunks of one memory don't repeat it.
+        const processedMemories = new Set<string>();
+
+        const memories: Memory[] = [];
+        for (const embedding of embeddings) {
+            if (processedMemories.has(embedding.memoryId)) {
+                continue;
+            }
+
+            processedMemories.add(embedding.memoryId);
+            const memory = await MemoryProvider.getById(userId, embedding.memoryId);
+            if (memory) {
+                memories.push(memory);
+            }
+        }
+
+        return memories;
     }
 
     chunk(content: string): string[] {
