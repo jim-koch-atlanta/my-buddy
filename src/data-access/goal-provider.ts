@@ -1,5 +1,5 @@
 import { Goal } from '../models/goal';
-import { getUserPoolProvider } from './user-pool-provider';
+import { getUserDb } from './user-scoped-db';
 
 export class GoalProvider {
     private static rowToGoal(row: any): Goal {
@@ -34,12 +34,12 @@ export class GoalProvider {
             query += ` LIMIT $${params.length}`;
         }
 
-        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        const { rows } = await getUserDb(user_id).query(query, params);
         return this.rowsToGoals(rows);
     }
 
     public static async getById(user_id: string, id: string): Promise<Goal | null> {
-        const { rows } = await getUserPoolProvider(user_id).query(
+        const { rows } = await getUserDb(user_id).query(
             `SELECT id, user_id, domain_id, title, description, status, created_at
             FROM goals WHERE id=$1`, [ id ]
         );

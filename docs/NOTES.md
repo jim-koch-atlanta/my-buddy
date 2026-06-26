@@ -39,7 +39,7 @@ docker compose down -v && docker compose up --build
 Then I can run `npx tsx` and have a REPL:
 ```
 const m = await import('./src/data-access/user-pool-provider.ts')
-const userPool = m.default.getUserPoolProvider('11111111-2222-3333-4444-555555555555')
+const userPool = m.default.getUserDb('11111111-2222-3333-4444-555555555555')
 await userPool.query('SELECT * FROM nudges WHERE user_id=$1', ['11111111-2222-3333-4444-555555555555'])
 ```
 

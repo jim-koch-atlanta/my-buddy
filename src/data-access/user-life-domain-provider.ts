@@ -1,5 +1,5 @@
 import { UserLifeDomain } from '../models/user-life-domain';
-import { getUserPoolProvider } from './user-pool-provider';
+import { getUserDb } from './user-scoped-db';
 
 export class UserLifeDomainProvider {
     private static rowToUserLifeDomain(row: any): UserLifeDomain {
@@ -28,7 +28,7 @@ export class UserLifeDomainProvider {
     }
 
     public static async getByUserId(user_id: string): Promise<UserLifeDomain[]> {
-        const { rows } = await getUserPoolProvider(user_id).query(
+        const { rows } = await getUserDb(user_id).query(
             `SELECT user_id, life_domain_id, priority, desired_cadence_days, max_nudges_per_week,
                     emotional_load_tolerance, allowed_reminder_start, allowed_reminder_end, enabled, created_at
             FROM user_life_domains WHERE user_id=$1`, [ user_id ]

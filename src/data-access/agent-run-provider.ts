@@ -1,5 +1,5 @@
 import { AgentRun } from '../models/agent-run';
-import { getUserPoolProvider } from './user-pool-provider';
+import { getUserDb } from './user-scoped-db';
 
 export class AgentRunProvider {
     private static rowToAgentRun(row: any): AgentRun {
@@ -39,7 +39,7 @@ export class AgentRunProvider {
             query += ` LIMIT $${params.length}`;
         }
 
-        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        const { rows } = await getUserDb(user_id).query(query, params);
         return this.rowsToAgentRuns(rows);
     }
 }

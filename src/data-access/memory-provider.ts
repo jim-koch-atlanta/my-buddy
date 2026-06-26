@@ -1,4 +1,4 @@
-import { getUserPoolProvider } from "./user-pool-provider";
+import { getUserDb } from "./user-scoped-db";
 import { Memory, ProtoMemory } from "../models/memory";
 
 export class MemoryProvider {
@@ -40,12 +40,12 @@ export class MemoryProvider {
             query += ` LIMIT $${params.length}`;
         }
 
-        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        const { rows } = await getUserDb(user_id).query(query, params);
         return this.rowsToMemories(rows);
     }
 
     public static async getById(user_id: string, id: string): Promise<Memory | null> {
-        const { rows } = await getUserPoolProvider(user_id).query(
+        const { rows } = await getUserDb(user_id).query(
             `SELECT id, user_id, memory_type, domain, source_type, source_id, content, importance, confidence, valid_from, valid_until, superseded_by, created_at
             FROM memories WHERE id=$1`, [ id ]
         );
@@ -76,7 +76,7 @@ export class MemoryProvider {
                 memory.validUntil, memory.supersededBy
             ];
 
-        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        const { rows } = await getUserDb(user_id).query(query, params);
 
         if (rows.length == 0) {
             throw new Error(`INSERT to memories table returned no rows.`);

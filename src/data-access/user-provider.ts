@@ -1,9 +1,9 @@
 import { User } from '../models/user';
-import { getUserPoolProvider } from './user-pool-provider';
+import { getUserDb } from './user-scoped-db';
 
 export class UserProvider {
     public static async getUserById(id: string): Promise<User | null> {
-        const { rows } = await getUserPoolProvider(id).query(
+        const { rows } = await getUserDb(id).query(
             `SELECT id, email, name, timezone, cognito_sub, email_verified, status, created_at
             FROM users WHERE id=$1`, [ id ]
         );

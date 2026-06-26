@@ -1,5 +1,5 @@
 import { Nudge } from '../models/nudge';
-import { getUserPoolProvider } from './user-pool-provider';
+import { getUserDb } from './user-scoped-db';
 
 export class NudgeProvider {
     private static rowToNudge(row: any): Nudge {
@@ -37,7 +37,7 @@ export class NudgeProvider {
             query += ` LIMIT $${params.length}`;
         }
 
-        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        const { rows } = await getUserDb(user_id).query(query, params);
         return this.rowsToNudges(rows);
     }
 }

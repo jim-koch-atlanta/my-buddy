@@ -1,4 +1,4 @@
-import { getUserPoolProvider } from "./user-pool-provider";
+import { getUserDb } from "./user-scoped-db";
 import { MemoryEmbedding, ProtoMemoryEmbedding } from "../models/memory-embedding";
 import { RetrievedMemoryEmbedding } from "../buddy-ai/types";
 import { MemoryFilters } from "./memory-filters/memory-filters";
@@ -38,12 +38,12 @@ export class MemoryEmbeddingProvider {
             query += ` LIMIT $${params.length}`;
         }
 
-        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        const { rows } = await getUserDb(user_id).query(query, params);
         return this.rowsToMemoryEmbeddings(rows);
     }
 
     public static async getById(user_id: string, id: string): Promise<MemoryEmbedding | null> {
-        const { rows } = await getUserPoolProvider(user_id).query(
+        const { rows } = await getUserDb(user_id).query(
             `SELECT id, user_id, memory_id, chunk_index, chunk_text, embedding, embedding_model, created_at
              FROM memory_embeddings WHERE id=$1`, [ id ]
         );
@@ -86,7 +86,7 @@ export class MemoryEmbeddingProvider {
         params.push(limit);
         query += ` LIMIT $${params.length}`;
 
-        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        const { rows } = await getUserDb(user_id).query(query, params);
         return rows.map((row) => this.rowToRetrievedMemoryEmbedding(row));
     }
 
@@ -111,7 +111,7 @@ export class MemoryEmbeddingProvider {
                 memoryEmbedding.chunkText, this.embeddingToPostgresFormat(memoryEmbedding.embedding), memoryEmbedding.embeddingModel
             ];
 
-        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        const { rows } = await getUserDb(user_id).query(query, params);
 
         if (rows.length == 0) {
             throw new Error(`INSERT to memory_embeddings table returned no rows.`);

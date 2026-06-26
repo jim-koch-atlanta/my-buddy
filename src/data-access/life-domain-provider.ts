@@ -1,8 +1,8 @@
 import { LifeDomain } from '../models/life-domain';
-import { getUserPoolProvider } from './user-pool-provider';
+import { getUserDb } from './user-scoped-db';
 
 // life_domains is a SHARED catalog: no user_id, no RLS. The userId argument is used
-// ONLY to obtain a database connection via getUserPoolProvider — these queries are
+// ONLY to obtain a database connection via getUserDb — these queries are
 // unaffected by the tenant context because the table has no RLS policy.
 export class LifeDomainProvider {
     private static rowToLifeDomain(row: any): LifeDomain {
@@ -24,7 +24,7 @@ export class LifeDomainProvider {
     }
 
     public static async getAll(user_id: string): Promise<LifeDomain[]> {
-        const { rows } = await getUserPoolProvider(user_id).query(
+        const { rows } = await getUserDb(user_id).query(
             `SELECT id, name, created_at
             FROM life_domains ORDER BY name`
         );
@@ -33,7 +33,7 @@ export class LifeDomainProvider {
     }
 
     public static async getByName(user_id: string, name: string): Promise<LifeDomain | null> {
-        const { rows } = await getUserPoolProvider(user_id).query(
+        const { rows } = await getUserDb(user_id).query(
             `SELECT id, name, created_at
             FROM life_domains WHERE name=$1`, [ name ]
         );

@@ -1,5 +1,5 @@
 import { DailyPlan } from '../models/daily-plan';
-import { getUserPoolProvider } from './user-pool-provider';
+import { getUserDb } from './user-scoped-db';
 
 export class DailyPlanProvider {
     private static rowToDailyPlan(row: any): DailyPlan {
@@ -32,12 +32,12 @@ export class DailyPlanProvider {
             query += ` LIMIT $${params.length}`;
         }
 
-        const { rows } = await getUserPoolProvider(user_id).query(query, params);
+        const { rows } = await getUserDb(user_id).query(query, params);
         return this.rowsToDailyPlans(rows);
     }
 
     public static async getById(user_id: string, id: string): Promise<DailyPlan | null> {
-        const { rows } = await getUserPoolProvider(user_id).query(
+        const { rows } = await getUserDb(user_id).query(
             `SELECT id, user_id, plan_date, summary, created_at
             FROM daily_plans WHERE id=$1`, [ id ]
         );

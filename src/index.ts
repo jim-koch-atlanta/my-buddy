@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { getUserPoolProvider } from './data-access/user-pool-provider';
+import { getUserDb } from './data-access/user-scoped-db';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -57,7 +57,7 @@ const user_id='';
 // Sample Route: Get current database time to verify connection
 app.get('/api/db-status', async (req: Request, res: Response) => {
   try {
-    const userPool = getUserPoolProvider(user_id);
+    const userPool = getUserDb(user_id);
     const result = await userPool.query("SELECT * FROM nudges WHERE user_id = $1", [user_id]);
     res.json({
       success: true,
