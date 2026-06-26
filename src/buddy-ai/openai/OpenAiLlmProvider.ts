@@ -1,7 +1,10 @@
 import dotenv from 'dotenv';
 import OpenAI from "openai";
-import { EmbedResult, LlmProvider } from '../LlmProvider';
-import { EmbedOptions } from '../types';
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from 'zod/v4';
+
+import { EmbedResult, GenerateResult, LlmProvider } from '../LlmProvider';
+import { ChatMessage, ChatOptions, EmbedOptions } from '../types';
 
 dotenv.config();
 
@@ -46,5 +49,36 @@ export class OpenAiLlmProvider implements LlmProvider {
             }));
 
         return { embeddings, embeddingModel: model };
+    }
+
+    async generateStructured<S extends z.ZodType>(
+        messages: ChatMessage[],
+        outputSchema: S,
+        options?: ChatOptions,
+    ): Promise<GenerateResult<z.infer<S>>> {
+        const model = options?.model ?? this.defaultChatModel;
+
+        const completion = await this.client.chat.completions.parse({
+            model: model,
+            temperature: options?.temperature,
+            messages: messages,
+            response_format: zodResponseFormat(
+                outputSchema,
+                "structured_output",
+            ),
+        });
+
+        const parsed = completion.choices[0]?.message.parsed;
+
+        if (parsed == null) {
+            throw new Error("Model did not return a parsed structured response.");
+        }
+
+        return {
+            data: parsed,
+            model: completion.model,
+            promptTokens: completion.usage?.prompt_tokens ?? 0,
+            completionTokens: completion.usage?.completion_tokens ?? 0,
+        };
     }
 }

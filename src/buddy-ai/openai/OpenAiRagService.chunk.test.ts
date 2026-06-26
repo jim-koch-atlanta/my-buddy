@@ -6,6 +6,9 @@ import { LlmProvider } from '../LlmProvider';
 // A stub satisfies the type without doing any real work.
 const stubLlm: LlmProvider = {
     embed: async () => ({ embeddings: [], embeddingModel: 'stub' }),
+    generateStructured: async () => {
+        throw new Error('stubLlm.generateStructured should not be called in chunk tests');
+    },
 };
 
 const service = new OpenAiRagService({ llmProvider: stubLlm });
@@ -39,9 +42,6 @@ describe('OpenAiRagService.chunk', () => {
     });
 
     // --- Long, multi-paragraph content splits on paragraph boundaries ------------
-    // NOTE: these exercise the for...in path and currently FAIL — `for (x in arr)`
-    // iterates indices ("0","1"), so the impl pushes index strings, not paragraphs.
-    // They should pass once it becomes `for (const p of paragraphs)`.
     describe('long content split into paragraphs', () => {
         it('keeps each paragraph as its own chunk when each is under the limit', () => {
             const p1 = 'A'.repeat(600);
