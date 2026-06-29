@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const NudgeSuggestion = z.object({
   title: z.string().describe("The title of the nudge suggestion."),
