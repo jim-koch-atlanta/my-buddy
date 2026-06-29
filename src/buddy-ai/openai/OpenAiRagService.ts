@@ -71,6 +71,30 @@ export class OpenAiRagService implements RagService {
         return memories;
     }
 
+    buildContextBlock(memories: Memory[]): string {
+        if (memories.length === 0) {
+            return '<RELEVANT_MEMORIES>none at this time.</RELEVANT_MEMORIES>';
+        }
+
+        const memoryLines = memories
+        .map((m, i) => 
+            `#${i + 1}. **Content**: ${m.content}\n**When**: ${m.createdAt.toISOString()}\n**Importance**: ${m.importance}`)
+        .join('\n\n');
+
+        const memoryContextBlock = `<RELEVANT_MEMORIES>
+The following memories are relevant to the request.
+Each memory includes:
+* a text description in the Content field
+* a creation time in the When field
+* an Importance value (5=extremely important, 1=not very important).
+
+${memoryLines}
+
+</RELEVANT_MEMORIES>
+`;
+        return memoryContextBlock;
+    }
+
     chunk(content: string): string[] {
         if (content.length <= CHUNK_MAX_SIZE) {
             return [content];   // the common case: no splitting

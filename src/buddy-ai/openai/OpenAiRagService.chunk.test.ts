@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { OpenAiRagService } from './OpenAiRagService';
 import { LlmProvider } from '../LlmProvider';
+import { Memory } from '../../models/memory';
 
 // chunk() doesn't use the LlmProvider, but the constructor requires one.
 // A stub satisfies the type without doing any real work.
@@ -104,6 +105,64 @@ describe('OpenAiRagService.chunk', () => {
                 rebuilt += result[i].slice(CHUNK_OVERLAP);
             }
             expect(rebuilt).toEqual(text);
+        });
+    });
+});
+
+describe('OpenAiRagService.buildContextBlock', () => {
+    // --- No relevant memories ---
+    describe('no relevant memories provided', () => {
+        it('returns a hard-coded sentinel', () => {
+            const text = '<RELEVANT_MEMORIES>none at this time.</RELEVANT_MEMORIES>';
+            expect(service.buildContextBlock([])).toEqual(text);
+        });
+    });
+
+    // --- Two relevant memories provided ---
+    describe('two relevant memories provided', () => {
+        it('returns formatted information about the relevant memories', () => {
+            const memory_one: Memory = {
+                userId: '',
+                id: '',
+                supersededBy: null,
+                memoryType: '',
+                domain: '',
+                sourceType: '',
+                sourceId: '',
+                content: 'Test content one.',
+                importance: 5,
+                confidence: 0.6,
+                createdAt: new Date('2026-06-28T12:00:00Z'),
+                validFrom: new Date(),
+                validUntil: new Date(),
+            }
+
+            const memory_two: Memory = {
+                userId: '',
+                id: '',
+                supersededBy: null,
+                memoryType: '',
+                domain: '',
+                sourceType: '',
+                sourceId: '',
+                content: 'Test content two.',
+                importance: 1,
+                confidence: 0.6,
+                createdAt: new Date('2026-06-28T12:00:00Z'),
+                validFrom: new Date(),
+                validUntil: new Date(),
+            }
+
+            const expectedResultOne = `#1. **Content**: Test content one.\n**When**: 2026-06-28T12:00:00.000Z\n**Importance**: 5`;
+            const expectedResultTwo = `#2. **Content**: Test content two.\n**When**: 2026-06-28T12:00:00.000Z\n**Importance**: 1`;
+
+
+            const actualResult = service.buildContextBlock([memory_one, memory_two]);
+            expect(actualResult.includes(expectedResultOne));
+            expect(actualResult).toMatch(/^<RELEVANT_MEMORIES>/);
+            expect(actualResult).toContain(expectedResultOne);
+            expect(actualResult).toContain(expectedResultTwo);
+            expect(actualResult).toContain('</RELEVANT_MEMORIES>');
         });
     });
 });
