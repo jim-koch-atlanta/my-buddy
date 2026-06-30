@@ -1,12 +1,15 @@
-export interface Nudge {
-    id: string; // uuid
-    userId: string;
+export interface NewNudge {
     domainId: string;
-    goalId: string;
+    goalId: string | null;
     title: string;
     body: string;
     effortMinutes: number;
-    emotionalLoad: string;
+    emotionalLoad: number;
+}
+
+export interface Nudge extends NewNudge {
+    id: string; // uuid
+    userId: string;
     status: string;
     createdAt: Date;
 }

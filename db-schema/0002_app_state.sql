@@ -21,7 +21,7 @@ CREATE TABLE user_life_domains (
   priority                 int  NOT NULL DEFAULT 3, -- 1=high .. 5=low
   desired_cadence_days     int  NOT NULL DEFAULT 7,
   max_nudges_per_week      int  NOT NULL DEFAULT 3,
-  emotional_load_tolerance text NOT NULL DEFAULT 'medium', -- low|medium|high
+  emotional_load_tolerance smallint NOT NULL DEFAULT 3, -- 1..5
   allowed_reminder_start   time,
   allowed_reminder_end     time,
   enabled                  boolean NOT NULL DEFAULT true,
@@ -61,7 +61,7 @@ CREATE TABLE nudges (
   title          text NOT NULL,
   body           text NOT NULL,
   effort_minutes int,
-  emotional_load text NOT NULL DEFAULT 'low',
+  emotional_load smallint NOT NULL DEFAULT 3,  -- 1..5
   status         text NOT NULL DEFAULT 'proposed', -- proposed|scheduled|done|skipped|snoozed
   created_at     timestamptz NOT NULL DEFAULT now()
 );

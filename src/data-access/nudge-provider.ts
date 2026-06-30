@@ -1,4 +1,4 @@
-import { Nudge } from '../models/nudge';
+import { NewNudge, Nudge } from '../models/nudge';
 import { getUserDb } from './user-scoped-db';
 
 export class NudgeProvider {
@@ -39,5 +39,33 @@ export class NudgeProvider {
 
         const { rows } = await getUserDb(user_id).query(query, params);
         return this.rowsToNudges(rows);
+    }
+
+    public static async create(user_id: string, nudge: NewNudge) : Promise<Nudge> {
+        const query = `
+            INSERT INTO nudges (
+                user_id, domain_id, goal_id,
+                title, body, effort_minutes,
+                emotional_load
+            )
+            VALUES($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *`;
+
+         const params: any[] =
+            [
+                user_id, nudge.domainId, nudge.goalId,
+                nudge.title, nudge.body, nudge.effortMinutes,
+                nudge.emotionalLoad
+            ];
+
+        const { rows } = await getUserDb(user_id).query(query, params);
+
+        if (rows.length == 0) {
+            throw new Error(`INSERT to nudges table returned no rows.`);
+        } else if (rows.length > 1) {
+            console.error(`Multiple rows returned on INSERT: ${ JSON.stringify(rows)}`);
+        }
+
+        return this.rowToNudge(rows[0]);
     }
 }

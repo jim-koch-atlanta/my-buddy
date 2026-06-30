@@ -6,7 +6,7 @@ export interface UserLifeDomain {
     priority: number;
     desiredCadenceDays: number;
     maxNudgesPerWeek: number;
-    emotionalLoadTolerance: string; // low|medium|high
+    emotionalLoadTolerance: number;
     allowedReminderStart: string | null; // pg returns `time` as a string e.g. '09:00:00'
     allowedReminderEnd: string | null;
     enabled: boolean;
