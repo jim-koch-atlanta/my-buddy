@@ -1,4 +1,4 @@
-import { NudgeFeedback } from '../models/nudge-feedback';
+import { NewNudgeFeedback, NudgeFeedback } from '../models/nudge-feedback';
 import { getUserDb } from './user-scoped-db';
 
 export class NudgeFeedbackProvider {
@@ -30,5 +30,29 @@ export class NudgeFeedbackProvider {
         );
 
         return this.rowsToNudgeFeedbacks(rows);
+    }
+
+    public static async create(user_id: string, nudgeFeedback: NewNudgeFeedback) : Promise<NudgeFeedback> {
+        const query = `
+            INSERT INTO nudge_feedback (
+                user_id, nudge_id, feedback_type, notes
+            )
+            VALUES($1, $2, $3, $4)
+            RETURNING *`;
+
+         const params: any[] =
+            [
+                user_id, nudgeFeedback.nudgeId, nudgeFeedback.feedbackType, nudgeFeedback.notes
+            ];
+
+        const { rows } = await getUserDb(user_id).query(query, params);
+
+        if (rows.length == 0) {
+            throw new Error(`INSERT to nudge_feedback table returned no rows.`);
+        } else if (rows.length > 1) {
+            console.error(`Multiple rows returned on INSERT: ${ JSON.stringify(rows)}`);
+        }
+
+        return this.rowToNudgeFeedback(rows[0]);
     }
 }

@@ -1,4 +1,4 @@
-import { AgentRun } from '../models/agent-run';
+import { NewAgentRun, AgentRun } from '../models/agent-run';
 import { getUserDb } from './user-scoped-db';
 
 export class AgentRunProvider {
@@ -41,5 +41,34 @@ export class AgentRunProvider {
 
         const { rows } = await getUserDb(user_id).query(query, params);
         return this.rowsToAgentRuns(rows);
+    }
+
+    public static async create(user_id: string, agentRun: NewAgentRun) : Promise<AgentRun> {
+        const inputJson  = agentRun.inputJson  == null ? null : JSON.stringify(agentRun.inputJson);
+        const outputJson = agentRun.outputJson == null ? null : JSON.stringify(agentRun.outputJson);
+
+        const query = `
+            INSERT INTO agent_runs (
+                user_id, agent_name, daily_plan_id, input_json, output_json,
+                model, prompt_tokens, completion_tokens, cost_usd
+            )
+            VALUES($1, $2, $3, $4::jsonb, $5::jsonb, $6, $7, $8, $9)
+            RETURNING *`;
+
+         const params: any[] =
+            [
+                user_id, agentRun.agentName, agentRun.dailyPlanId, inputJson, outputJson,
+                agentRun.model, agentRun.promptTokens, agentRun.completionTokens, agentRun.costUsd
+            ];
+
+        const { rows } = await getUserDb(user_id).query(query, params);
+
+        if (rows.length == 0) {
+            throw new Error(`INSERT to agent_runs table returned no rows.`);
+        } else if (rows.length > 1) {
+            console.error(`Multiple rows returned on INSERT: ${ JSON.stringify(rows)}`);
+        }
+
+        return this.rowToAgentRun(rows[0]);
     }
 }
