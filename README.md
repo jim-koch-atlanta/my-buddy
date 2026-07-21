@@ -108,7 +108,7 @@ Here is the planned tech stack:
 | 1      | LLM `generateStructured` (zod structured output)                          | ✅ Done     |
 | 2      | `buildContextBlock` (format memories, create prompt block)                | ✅ Done     |
 | 3      | write providers (`create()` functions)                                    | ✅ Done     |
-| 4      | Friendship domain agent: retrieve -> ground -> generate a NudgeSuggestion | ⬜ Not Done |
+| 4      | Friendship domain agent: retrieve -> ground -> generate a NudgeSuggestion | ✅ Done     |
 | 5      | Balance governor - pick the day's plan                                    | ⬜ Not Done |
 | 6      | `runDailyPlan()` - orchestrator that ties everything together             | ⬜ Not Done |
 | 7      | CLI shell - login, print plan, capture feedback, store memory             | ⬜ Not Done |

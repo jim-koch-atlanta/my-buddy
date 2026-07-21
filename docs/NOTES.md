@@ -167,3 +167,33 @@ Results (best first):
   [0.3442]  Jim has read the Andre Agassi book "Open" and enjoyed it.
   [0.3212]  Jim played tennis from when he was a little kid until 11th grade.
 ```
+
+## Friendship domain agent
+
+Reset the database:
+
+```sh
+docker compose down -v && docker compose up -d
+```
+
+Run the test script:
+
+```sh
+npx tsx scripts/scratch/propose-friendship-nudge.ts
+```
+
+Result:
+
+```
+Proposing a friendship nudge for user 11111111-2222-3333-4444-555555555555...
+
+--- Suggestion ------------------------------------------------
+Title:          Reach Out to a Friend
+Body:           Send a short text or message to a friend you haven't talked to in a while, just to say hi and see how they're doing.
+Effort (min):   5
+Emotional load: 1
+Rationale:      Reaching out to a friend can strengthen bonds and improve your emotional well-being. It's a small, low-pressure action that could brighten both your day and theirs.
+--- Usage -----------------------------------------------------
+Model:  gpt-4o-mini-2024-07-18
+Tokens: 306 prompt + 86 completion
+```

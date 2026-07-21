@@ -16,3 +16,5 @@ export const NudgeSuggestion = z.object({
     .describe("The expected emotional load from completing this nudge."),
   rationale: z.string().describe("The rationale for suggesting this nudge."),
 });
+
+export type NudgeSuggestionData = z.infer<typeof NudgeSuggestion>;
