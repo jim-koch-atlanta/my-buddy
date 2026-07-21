@@ -24,7 +24,7 @@ Again, this is primarily a hobby project for me. I'd like to try to write much o
 
 ### Design Decisions
 
-1. **One database.** App state *and* RAG memory will both live in the same Postgres DB. We'll access the RAG memory with the `pgvector` extension. For a future v2, it could possibly use Amazon OpenSearch.
+1. **One database.** App state _and_ RAG memory will both live in the same Postgres DB. We'll access the RAG memory with the `pgvector` extension. For a future v2, it could possibly use Amazon OpenSearch.
 
 2. **Real RAG, not prompt-stuffing.** I want to do real RAG, so the nudge "memories" will be embedded and retrieved by semantic similarity + metadata filtering.
 
@@ -33,6 +33,7 @@ Again, this is primarily a hobby project for me. I'd like to try to write much o
 ### Architecture Diagram
 
 Pretty picture of the design, made by Claude:
+
 ```
 ┌─────────────┐   HTTPS     ┌───────────────────────────┐
 │  React SPA  │ ──────────► │   API (Express/TS)        │
@@ -64,21 +65,21 @@ Pretty picture of the design, made by Claude:
 
 Here is the planned tech stack:
 
-| Component | Choice | Why |
-|---|---|---|
-| Frontend | React (Vite) on S3 + CloudFront | static, cheap, scales trivially |
-| API | Node + TypeScript + Express | stateless |
-| DB | Postgres 15+ + `pgvector` | one DB for app state **and** RAG |
+| Component           | Choice                                                          | Why                                                                                                                                         |
+| ------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend            | React (Vite) on S3 + CloudFront                                 | static, cheap, scales trivially                                                                                                             |
+| API                 | Node + TypeScript + Express                                     | stateless                                                                                                                                   |
+| DB                  | Postgres 15+ + `pgvector`                                       | one DB for app state **and** RAG                                                                                                            |
 | Schema & migrations | **explicit SQL files** + a plain-SQL runner (postgrator/dbmate) | hand-written `CREATE TABLE`/RLS/roles are the single source of truth; the runner only applies & tracks them — no diffing, no auto-migration |
-| Query layer | **raw `pg`** (node-postgres) + hand-written TS row types | a query layer only; never owns or migrates schema |
-| Auth | **Cognito** | managed, scales, less surface to get wrong |
-| LLM | OpenAI | preferred for consumer-facing apps |
-| Queue (scale) | SQS (+ DLQ) | fan-out the daily run |
-| Cache (scale) | ElastiCache (Redis) | sessions, hot reads, per-tenant limits |
-| Scheduler | EventBridge Scheduler | per-timezone daily runs |
-| Email | SES | near-free reminders |
-| Secrets | Secrets Manager / SSM | no keys in code |
-| IaC | Terraform or AWS CDK | reproducible |
+| Query layer         | **raw `pg`** (node-postgres) + hand-written TS row types        | a query layer only; never owns or migrates schema                                                                                           |
+| Auth                | **Cognito**                                                     | managed, scales, less surface to get wrong                                                                                                  |
+| LLM                 | OpenAI                                                          | preferred for consumer-facing apps                                                                                                          |
+| Queue (scale)       | SQS (+ DLQ)                                                     | fan-out the daily run                                                                                                                       |
+| Cache (scale)       | ElastiCache (Redis)                                             | sessions, hot reads, per-tenant limits                                                                                                      |
+| Scheduler           | EventBridge Scheduler                                           | per-timezone daily runs                                                                                                                     |
+| Email               | SES                                                             | near-free reminders                                                                                                                         |
+| Secrets             | Secrets Manager / SSM                                           | no keys in code                                                                                                                             |
+| IaC                 | Terraform or AWS CDK                                            | reproducible                                                                                                                                |
 
 ## Build Plan
 
@@ -88,8 +89,10 @@ Here is the planned tech stack:
 4. Add local seed data for two test users for testing.
 5. Build the data-access layer for per-request tenant-specific wrapper classes.
 6. `RagService` + `LlmProvider` interfaces; embed/retrieve working against seed memories (scoped per user).
-  * Validate embedding of local seed data.
-  * Validate retrieval-augmented generation with local seed data.
+
+- Validate embedding of local seed data.
+- Validate retrieval-augmented generation with local seed data.
+
 7. One domain agent (e.g. friendship) producing a structured suggestion from retrieved memory.
 8. Balance governor + `daily_plans`/`daily_plan_items`; daily run end-to-end (in-process loop).
 9. Minimal React UI: today's plan + feedback buttons (feedback → new memories).
@@ -98,6 +101,18 @@ Here is the planned tech stack:
 12. Deploy modest (App Runner + RDS + Cognito + S3/CloudFront + EventBridge Scheduler)
 13. Budgets/billing alarms.
 
+## Build Plan to CLI Proof-of-Concept
+
+| Step # | What it is                                                                | Status      |
+| ------ | ------------------------------------------------------------------------- | ----------- |
+| 1      | LLM `generateStructured` (zod structured output)                          | ✅ Done     |
+| 2      | `buildContextBlock` (format memories, create prompt block)                | ✅ Done     |
+| 3      | write providers (`create()` functions)                                    | ✅ Done     |
+| 4      | Friendship domain agent: retrieve -> ground -> generate a NudgeSuggestion | ⬜ Not Done |
+| 5      | Balance governor - pick the day's plan                                    | ⬜ Not Done |
+| 6      | `runDailyPlan()` - orchestrator that ties everything together             | ⬜ Not Done |
+| 7      | CLI shell - login, print plan, capture feedback, store memory             | ⬜ Not Done |
+
 ## Disclaimer
 
-This is strictly a hobby project and portfolio project. The output from My Buddy should not be used as actual life coaching, mental health counseling, or lifestyle guidance. ***It is not a substitute for professional mental-health care; if you're in crisis, contact a qualified professional or a crisis hotline.***
+This is strictly a hobby project and portfolio project. The output from My Buddy should not be used as actual life coaching, mental health counseling, or lifestyle guidance. **_It is not a substitute for professional mental-health care; if you're in crisis, contact a qualified professional or a crisis hotline._**
