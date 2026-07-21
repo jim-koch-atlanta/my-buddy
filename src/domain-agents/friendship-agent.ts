@@ -1,16 +1,16 @@
-import { z } from "zod/v4";
+import { AgentInterface, ProposeNudgeResult } from "./agent-interface";
 
-import { Memory } from "../models/memory";
-import { RagService } from "../buddy-ai/RagService";
-import { LlmProvider } from "../buddy-ai/LlmProvider";
 import { ChatMessage } from "../buddy-ai/types";
+import { LlmProvider, GenerateResult } from "../buddy-ai/LlmProvider";
+import { RagService } from "../buddy-ai/RagService";
 import { NudgeSuggestion, NudgeSuggestionData } from "../buddy-ai/structured-output";
-import { GenerateResult } from "../buddy-ai/LlmProvider";
 
 import { MemoryFilters } from "../data-access/memory-filters/memory-filters";
 import { DomainMemoryFilter } from "../data-access/memory-filters/domain-memory-filter";
 
-export class FriendshipAgent {
+import { Memory } from "../models/memory";
+
+export class FriendshipAgent implements AgentInterface {
     ragService: RagService;
     llmProvider: LlmProvider;
 
@@ -55,7 +55,7 @@ export class FriendshipAgent {
         return this.llmProvider.generateStructured([ systemMessage, userMessage ], NudgeSuggestion);
     }
 
-    async proposeNudge(userId: string) {
+    async proposeNudge(userId: string): Promise<ProposeNudgeResult> {
         const memories = await this.retrieveMemories(userId);
         const contextBlock = await this.groundMemories(memories);
         const result = await this.generateNudge(contextBlock);

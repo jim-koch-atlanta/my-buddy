@@ -1,7 +1,8 @@
 import { NudgeSuggestionData } from "../buddy-ai/structured-output";
 
 export interface NudgeCandidate {
-    domain: string;
+    domainName: string;
+    domainId: string;
     suggestion: NudgeSuggestionData;
 }
 

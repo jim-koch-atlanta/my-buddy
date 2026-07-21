@@ -41,6 +41,19 @@ export class NudgeProvider {
         return this.rowsToNudges(rows);
     }
 
+    public static async getNudgeById(user_id: string, nudge_id: string): Promise<Nudge | null> {
+        let query = `SELECT id, user_id, domain_id, goal_id, title, body, effort_minutes, emotional_load, status, created_at
+                    FROM nudges WHERE id=$1 ORDER BY created_at DESC`;
+
+        const { rows } = await getUserDb(user_id).query(query, [ nudge_id ]);
+
+        if (rows.length != 1) {
+            return null;
+        }
+
+        return this.rowToNudge(rows[0]);
+    }
+
     public static async create(user_id: string, nudge: NewNudge) : Promise<Nudge> {
         const query = `
             INSERT INTO nudges (

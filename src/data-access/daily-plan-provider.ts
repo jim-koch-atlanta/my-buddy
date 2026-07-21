@@ -24,7 +24,7 @@ export class DailyPlanProvider {
 
     // A plan_date is a calendar day, not an instant. Render a Date to a local
     // 'YYYY-MM-DD' string so the day doesn't shift across the DB session timezone.
-    private static toPlanDate(d: Date): string {
+    public static toPlanDate(d: Date): string {
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
